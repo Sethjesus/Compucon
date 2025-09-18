@@ -19,7 +19,7 @@
     h1{margin:0 0 6px;font-size:clamp(22px,4.2vw,34px)}
     .sub{color:var(--muted);font-size:15px}
     .badge{display:inline-block;background:rgba(15,122,229,.1);color:#0f7ae5;padding:6px 10px;border-radius:999px;font-size:12px;margin-right:8px}
-    .lang{position:absolute;right:0;top:22px;display:flex;gap:8px}
+    .lang{position:absolute;right:56px;top:22px;display:flex;gap:8px}
     .lang button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 10px;border-radius:999px;cursor:pointer;font-size:13px}
     .lang button.active{border-color:var(--brand);background:var(--brand);color:#fff}
 
@@ -38,34 +38,47 @@
 
     /* Carousel */
     .carousel{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#000}
+    .carousel.thumbs-top{ padding-top:92px; } /* 縮圖固定上方時，避免遮蓋內容 */
     .slides{display:flex;transition:transform .5s ease}
-    .slide{min-width:100%;height:56vw;max-height:540px;display:flex;align-items:center;justify-content:center;background:#000}
-    .slide img{width:100%;height:100%;object-fit:cover}
+    .slide{
+      min-width:100%;
+      aspect-ratio:16/9;
+      max-height:70vh;
+      display:grid;               /* 自動置中 */
+      place-items:center;         /* 水平+垂直置中 */
+      background:#000;
+    }
+    .slide img{
+      max-width:100%; max-height:100%;
+      width:auto; height:auto;
+      object-fit:contain; object-position:center center; /* 明確指定置中 */
+      background:#000; display:block;
+      user-select:none;-webkit-user-drag:none;pointer-events:none;
+    }
     .arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);border:none;color:#fff;width:42px;height:42px;border-radius:50%;cursor:pointer}
     .arrow:focus{outline:2px solid #fff4}
     .prev{left:10px} .next{right:10px}
-    .dots{position:absolute;left:0;right:0;bottom:14px;display:flex;gap:6px;justify-content:center;z-index:5}
+    .dots{position:absolute;left:0;right:0;bottom:14px;display:flex;gap:6px;justify-content:center;z-index:6}
     .dot{width:10px;height:10px;border-radius:50%;background:#fff8;cursor:pointer;border:1px solid #fff}
     .dot.active{background:#fff}
+
     .thumbs{display:flex;gap:8px;overflow:auto;padding:10px;background:#0b0b0b}
     .thumbs img{width:120px;height:68px;object-fit:cover;border-radius:8px;opacity:.6;cursor:pointer;border:2px solid transparent}
     .thumbs img.active{opacity:1;border-color:#fff}
-    .control{position:absolute;bottom:48px;right:12px;z-index:6}
+    .thumbs.fixed{
+      position:absolute;left:0;right:0;top:0;z-index:7;border-bottom:1px solid #111;
+      background:#0b0b0b;
+    }
+
+    .control{position:absolute;bottom:48px;right:12px;z-index:8}
     .control button{background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:18px}
 
-    /* 播放進度條 */
-    .progress{
-      position:absolute; left:0; right:0; bottom:0;
-      height:4px; background:rgba(255,255,255,.18); overflow:hidden; z-index:7;
-    }
-    .progress .bar{
-      width:0; height:100%;
-      background:var(--brand);
-      animation: fill linear forwards; /* 時間由 JS 動態設定 */
-    }
-    @keyframes fill{ from{width:0} to{width:100%} }
+    /* 進度條 */
+    .progress{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.18);overflow:hidden;z-index:8}
+    .progress .bar{width:0;height:100%;background:var(--brand);animation:fill linear forwards}
+    @keyframes fill{from{width:0}to{width:100%}}
 
-    /* Visit 相簿：統一尺寸 + 微動畫 */
+    /* Visit */
     .visit{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px;}
     @media(min-width:900px){ .visit{ grid-template-columns:repeat(4,1fr);} }
     .visit figure{margin:0;position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;aspect-ratio:4/3;opacity:0;transform:translateY(12px) scale(.98);transition:opacity .6s ease, transform .6s ease, box-shadow .4s ease;}
@@ -76,14 +89,44 @@
     .visit figcaption{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;padding:6px 8px;font-size:12px;}
     @media (prefers-reduced-motion:reduce){.visit figure,.visit img{transition:none !important;}}
 
-    /* Fullscreen 乾淨展示 */
+    /* Fullscreen */
     .carousel:fullscreen .arrow,
     .carousel:fullscreen .thumbs,
     .carousel:fullscreen .dots,
     .carousel:fullscreen .control,
     .carousel:fullscreen .progress { display:none !important; }
-    .carousel:fullscreen .slide{ height:100vh !important; max-height:100vh !important; }
+    .carousel:fullscreen .slide{ height:100vh !important; max-height:100vh !important; aspect-ratio:auto !important; }
     .carousel:fullscreen .slide img{ object-fit:contain !important; background:#000; }
+
+    /* Drag/Swipe 狀態樣式 */
+    .slides{ cursor: grab; }
+    .slides.dragging{ cursor: grabbing; }
+    .slides.no-trans{ transition: none !important; }
+
+    /* ⚙️ 設定面板 */
+    .gear{position:absolute;right:10px;top:18px;z-index:10}
+    .gear button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-size:18px}
+    .panel{
+      position:fixed;right:16px;top:64px;z-index:50;width:min(92vw,360px);
+      background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,.22);
+      padding:14px;display:none
+    }
+    .panel.open{display:block}
+    .panel h4{margin:0 0 8px}
+    .panel .row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0}
+    .panel input[type="number"],
+    .panel input[type="range"]{width:140px}
+    .panel .hint{color:var(--muted);font-size:12px;margin-top:4px}
+    .panel .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+    .panel .actions button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 10px;cursor:pointer}
+
+    /* 邊界跨頁淡入淡出 */
+    .edge-fade{
+      position:absolute;inset:0;pointer-events:none;opacity:0;z-index:9;
+      background:radial-gradient(80% 80% at 50% 50%, rgba(0,0,0,0) 30%, rgba(0,0,0,.35) 100%);
+      transition:opacity .4s ease;
+    }
+    .edge-fade.show{ opacity:1; }
   </style>
 </head>
 <body>
@@ -93,6 +136,53 @@
         <button id="btn-en" class="active">English</button>
         <button id="btn-zh">繁體中文</button>
       </div>
+
+      <!-- ⚙️ 設定 -->
+      <div class="gear"><button id="btn-gear" title="Settings">⚙️</button></div>
+      <div class="panel" id="panel">
+        <h4>Carousel Settings｜輪播設定</h4>
+
+        <div class="row">
+          <label for="dur">Auto-play (sec) 自動播放秒數</label>
+          <input id="dur" type="number" min="2" max="60" step="1">
+        </div>
+        <div class="row">
+          <label for="idle">Idle resume (sec) 閒置恢復</label>
+          <input id="idle" type="number" min="3" max="120" step="1">
+        </div>
+        <div class="row">
+          <label for="px">Drag threshold (px) 拖曳門檻</label>
+          <input id="px" type="number" min="0" max="400" step="5">
+        </div>
+        <div class="row">
+          <label for="ratio">Threshold ratio (%) 百分比</label>
+          <input id="ratio" type="range" min="0" max="50" step="1">
+        </div>
+
+        <div class="row">
+          <label for="enableDrag">Enable drag 啟用拖曳</label>
+          <input id="enableDrag" type="checkbox">
+        </div>
+        <div class="row">
+          <label for="enableLoop">Enable loop 循環播放</label>
+          <input id="enableLoop" type="checkbox">
+        </div>
+        <div class="row">
+          <label for="edgeFade">Edge crossfade 邊界淡入淡出</label>
+          <input id="edgeFade" type="checkbox">
+        </div>
+        <div class="row">
+          <label for="thumbTop">Thumbnails top 縮圖置頂</label>
+          <input id="thumbTop" type="checkbox">
+        </div>
+
+        <div class="hint">門檻同時滿足「像素 或 百分比」任一條件即換頁。淡入淡出僅在最後↔第一張時生效。</div>
+        <div class="actions">
+          <button id="reset">Reset 預設</button>
+          <button id="close">Close 關閉</button>
+        </div>
+      </div>
+
       <span class="badge" data-i18n="badge">Press Release</span>
       <h1 data-i18n="title">Compucon Visits YUAN &amp; AGROMEANS to Advance Jetson Edge Video AI Collaboration</h1>
       <div class="sub" data-i18n="sub">Date: September 15, 2025 ｜ Location: Taipei</div>
@@ -118,12 +208,12 @@
         <div class="slide"><img src="https://raw.githubusercontent.com/Sethjesus/Photo/main/Yuan15.jpg" alt="Strategy & roadmap" /></div>
         <div class="slide"><img src="https://raw.githubusercontent.com/Sethjesus/Photo/main/Yuan16.jpg" alt="Strategy & roadmap" /></div>
       </div>
+      <div class="edge-fade" id="edgeFadeLayer"></div>
       <button class="arrow prev" aria-label="Previous" id="prev">‹</button>
       <button class="arrow next" aria-label="Next" id="next">›</button>
       <div class="dots" id="dots"></div>
       <div class="thumbs" id="thumbs" aria-label="Thumbnails"></div>
       <div class="control"><button id="togglePlay" aria-label="Pause">⏸</button></div>
-      <!-- 播放進度條 -->
       <div class="progress"><div class="bar" id="progBar"></div></div>
     </section>
 
@@ -171,7 +261,6 @@
           <li data-i18n="core3">NVIDIA JetPack / Metropolis / Holoscan / Isaac ecosystem</li>
         </ul>
 
-        <!-- AGROMEANS -->
         <h3 data-i18n="mgAboutTitle">About AGROMEANS</h3>
         <p data-i18n="mgAbout">
           AGROMEANS focuses on <b>poultry & livestock</b> and <b>biotech agri</b>, combining edge AI, smart lighting,
@@ -190,8 +279,8 @@
     <footer><span data-i18n="footer">© 2025 Compucon · YUAN High-Tech · AGROMEANS — Media reference</span></footer>
   </div>
 
+  <!-- i18n -->
   <script>
-    // ---- i18n (EN default) ----
     const dict = {
       en: {
         badge:"Press Release",
@@ -275,11 +364,12 @@
       document.getElementById("btn-en").classList.toggle("active", lang==="en");
       document.getElementById("btn-zh").classList.toggle("active", lang==="zh-Hant");
     }
-    // init EN as default
     setLang("en");
     document.getElementById("btn-en").onclick = ()=>setLang("en");
     document.getElementById("btn-zh").onclick = ()=>setLang("zh-Hant");
+  </script>
 
+  <script>
     // ---------- Carousel logic ----------
     const slides = document.getElementById('slides');
     const frames = Array.from(slides.children);
@@ -290,124 +380,196 @@
     const toggleBtn = document.getElementById('togglePlay');
     const carousel = document.querySelector('.carousel');
     const progBar = document.getElementById('progBar');
+    const fadeLayer = document.getElementById('edgeFadeLayer');
+
+    // ===== 可調參數（帶 localStorage）=====
+    const store = {
+      k:'carousel_prefs_v3',
+      load(){ try{ return JSON.parse(localStorage.getItem(this.k)) ?? {}; }catch(e){ return {}; } },
+      save(obj){ try{ localStorage.setItem(this.k, JSON.stringify(obj)); }catch(e){} }
+    };
+    const defaults = {
+      DUR: 6000, IDLE_AFTER: 15000,
+      THRESHOLD_PX: 80, THRESHOLD_RATIO: 0.15,
+      ENABLE_DRAG: true, ENABLE_LOOP: true,
+      EDGE_FADE: true, THUMBS_TOP: false
+    };
+    const prefs = Object.assign({}, defaults, store.load());
+    let {DUR,IDLE_AFTER,THRESHOLD_PX,THRESHOLD_RATIO,ENABLE_DRAG,ENABLE_LOOP,EDGE_FADE,THUMBS_TOP} = prefs;
+
+    // 立即套用縮圖置頂樣式
+    applyThumbsTop();
 
     let idx = 0, timer = null, playing = true, idleResumeTimer = null;
-    const DUR = 6000;          // 每張停留 6 秒
-    const IDLE_AFTER = 15000;  // 互動 15 秒後自動恢復播放
 
-    function go(n){
-      idx = (n + frames.length) % frames.length;
+    function startProgress(){
+      if (!progBar) return;
+      progBar.style.animation = 'none';
+      void progBar.offsetWidth;
+      progBar.style.animation = `fill ${DUR}ms linear forwards`;
+      progBar.style.animationPlayState = playing ? 'running' : 'paused';
+    }
+    function play(){ clearInterval(timer); timer = setInterval(()=>safeNext(true), DUR); playing=true; toggleBtn.textContent="⏸"; toggleBtn.setAttribute("aria-label","Pause"); startProgress(); }
+    function pause(){ clearInterval(timer); playing=false; toggleBtn.textContent="▶"; toggleBtn.setAttribute("aria-label","Play"); if(progBar) progBar.style.animationPlayState='paused'; }
+    function restart(){ clearInterval(timer); timer = setInterval(()=>safeNext(true), DUR); startProgress(); }
+
+    function go(n, {fromAuto=false}={}){
+      const prevIdx = idx;
+      if(ENABLE_LOOP){
+        idx = (n + frames.length) % frames.length;
+      }else{
+        idx = Math.max(0, Math.min(frames.length-1, n));
+        if(fromAuto && ((prevIdx===frames.length-1 && n>prevIdx) || (prevIdx===0 && n<prevIdx))){ pause(); }
+      }
+
+      const isWrap = (prevIdx===frames.length-1 && idx===0) || (prevIdx===0 && idx===frames.length-1);
+      if(EDGE_FADE && isWrap){
+        fadeLayer.classList.add('show');
+        setTimeout(()=>fadeLayer.classList.remove('show'), 380);
+      }
+
       slides.style.transform = `translateX(-${idx*100}%)`;
       updateDots(); updateThumbs();
       if (playing) { restart(); } else { startProgress(); }
     }
-    function next(){ go(idx+1) }
-    function prev(){ go(idx-1) }
+    function safeNext(fromAuto=false){ go(idx+1, {fromAuto}); }
+    function safePrev(){ go(idx-1); }
 
-    function updateDots(){
-      dotsWrap.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active', i===idx));
-    }
+    function updateDots(){ dotsWrap.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active', i===idx)); }
     function updateThumbs(){
       thumbsWrap.querySelectorAll('img').forEach((t,i)=>t.classList.toggle('active', i===idx));
       const active = thumbsWrap.querySelector('img.active');
       if(active){ active.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }
     }
+    function pauseAndResumeLater(){ pause(); clearTimeout(idleResumeTimer); idleResumeTimer = setTimeout(()=>{ play(); }, IDLE_AFTER); }
 
-    function play(){
-      clearInterval(timer);
-      timer = setInterval(next, DUR);
-      playing = true;
-      toggleBtn.textContent = "⏸";
-      toggleBtn.setAttribute("aria-label","Pause");
-      startProgress();
-    }
-    function pause(){
-      clearInterval(timer);
-      playing = false;
-      toggleBtn.textContent = "▶";
-      toggleBtn.setAttribute("aria-label","Play");
-      if (progBar) progBar.style.animationPlayState = 'paused';
-    }
-    function restart(){
-      clearInterval(timer);
-      timer = setInterval(next, DUR);
-      startProgress();
-    }
-
-    // 進度條控制
-    function startProgress(){
-      if (!progBar) return;
-      progBar.style.animation = 'none';
-      void progBar.offsetWidth; // 強制重繪以重置動畫
-      progBar.style.animation = `fill ${DUR}ms linear forwards`;
-      progBar.style.animationPlayState = playing ? 'running' : 'paused';
-    }
-
-    function pauseAndResumeLater(){
-      pause();
-      clearTimeout(idleResumeTimer);
-      idleResumeTimer = setTimeout(()=>{ play(); }, IDLE_AFTER);
-    }
-
-    // dots + thumbs
+    // 生成 dots & thumbs
     frames.forEach((slide,i)=>{
       const d=document.createElement('div');
-      d.className='dot'+(i===0?' active':'');
-      d.setAttribute('role','button'); d.setAttribute('aria-label','Go to slide '+(i+1));
-      d.onclick=()=>{ go(i); pauseAndResumeLater(); };
-      dotsWrap.appendChild(d);
+      d.className='dot'+(i===0?' active':''); d.setAttribute('role','button'); d.setAttribute('aria-label','Go to slide '+(i+1));
+      d.onclick=()=>{ go(i); pauseAndResumeLater(); }; dotsWrap.appendChild(d);
 
-      const t=document.createElement('img');
-      const imgEl = slide.querySelector('img');
-      t.src = imgEl.currentSrc || imgEl.src;
-      t.alt='thumb '+(i+1);
-      if(i===0) t.classList.add('active');
-      t.loading='lazy'; t.decoding='async';
-      t.onclick=()=>{ go(i); pauseAndResumeLater(); };
-      thumbsWrap.appendChild(t);
+      const t=document.createElement('img'); const imgEl = slide.querySelector('img');
+      t.src = imgEl.currentSrc || imgEl.src; t.alt='thumb '+(i+1);
+      if(i===0) t.classList.add('active'); t.loading='lazy'; t.decoding='async';
+      t.onclick=()=>{ go(i); pauseAndResumeLater(); }; thumbsWrap.appendChild(t);
     });
 
     // 控制按鈕
     toggleBtn.onclick=()=>{ playing ? pause() : play(); };
-    nextBtn.onclick=()=>{ next(); pauseAndResumeLater(); };
-    prevBtn.onclick=()=>{ prev(); pauseAndResumeLater(); };
+    nextBtn.onclick=()=>{ safeNext(false); pauseAndResumeLater(); };
+    prevBtn.onclick=()=>{ safePrev(); pauseAndResumeLater(); };
 
     // 鍵盤快捷鍵
     document.addEventListener("keydown",(e)=>{
       if(e.code==="Space"){ e.preventDefault(); playing?pause():play(); }
-      if(e.code==="ArrowRight"){ next(); pauseAndResumeLater(); }
-      if(e.code==="ArrowLeft"){ prev(); pauseAndResumeLater(); }
-      if(e.code==="KeyF"){ toggleFullscreen(); }
+      if(e.code==="ArrowRight"){ safeNext(false); pauseAndResumeLater(); }
+      if(e.code==="ArrowLeft"){ safePrev(); pauseAndResumeLater(); }
+      if(e.code==="KeyF"){ if(!document.fullscreenElement){ carousel.requestFullscreen().catch(()=>{});} else { document.exitFullscreen(); } }
     });
 
-    // Fullscreen
-    function toggleFullscreen(){
-      if(!document.fullscreenElement){
-        carousel.requestFullscreen().catch(err=>console.warn(err));
-      } else { document.exitFullscreen(); }
-    }
-    document.addEventListener('fullscreenchange', ()=>{ /* 需要時可在此調整 */ });
-
-    // Visit cards：進入視窗才淡入
+    // Visit 卡片進場
     (function(){
       const cards = document.querySelectorAll('.visit figure');
       if(!cards.length) return;
-      if(!('IntersectionObserver' in window)){
-        cards.forEach(el=>el.classList.add('inview'));
-        return;
-      }
+      if(!('IntersectionObserver' in window)){ cards.forEach(el=>el.classList.add('inview')); return; }
       const io = new IntersectionObserver((entries, obs)=>{
-        entries.forEach(e=>{
-          if(e.isIntersecting){
-            e.target.classList.add('inview');
-            obs.unobserve(e.target);
-          }
-        });
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('inview'); obs.unobserve(e.target); }});
       }, { threshold: 0.2 });
       cards.forEach(el=>io.observe(el));
     })();
 
-    // Start
+    /* ===== Drag / Swipe ===== */
+    let isDragging=false,startX=0,deltaX=0,lastDX=0,blockedClick=false;
+    function pxToPercent(px){ const w = carousel.clientWidth || 1; return (px / w) * 100; }
+    function setTranslateWithDelta(dx){ slides.style.transform = `translateX(${-(idx*100) + pxToPercent(dx)}%)`; }
+    function onDown(clientX){
+      if(!ENABLE_DRAG) return;
+      isDragging=true; startX=clientX; deltaX=0; lastDX=0; blockedClick=false;
+      pauseAndResumeLater(); slides.classList.add('no-trans','dragging');
+    }
+    function onMove(clientX){
+      if(!isDragging) return;
+      deltaX=clientX-startX; lastDX=deltaX; if(Math.abs(deltaX)>5) blockedClick=true;
+      setTranslateWithDelta(deltaX); if(progBar) progBar.style.animationPlayState='paused';
+    }
+    function settle(){
+      const passPixel = Math.abs(lastDX) >= THRESHOLD_PX;
+      const passRatio = Math.abs(lastDX) >= (carousel.clientWidth * THRESHOLD_RATIO);
+      slides.classList.remove('no-trans','dragging');
+      if(passPixel || passRatio){ (lastDX<0) ? safeNext(false) : safePrev(); }
+      else{ slides.style.transform = `translateX(-${idx*100}%)`; if(playing) startProgress(); }
+    }
+    function onUp(){ if(!isDragging) return; isDragging=false; settle(); }
+
+    function pointerDown(e){ if(e.button!==undefined && e.button!==0) return; onDown(e.clientX);
+      window.addEventListener('mousemove', pointerMove, {passive:false});
+      window.addEventListener('mouseup', pointerUp, {passive:true});
+    }
+    function pointerMove(e){ if(!isDragging) return; e.preventDefault(); onMove(e.clientX); }
+    function pointerUp(){ window.removeEventListener('mousemove', pointerMove); window.removeEventListener('mouseup', pointerUp); onUp(); }
+    function touchStart(e){ if(!e.touches?.length) return; onDown(e.touches[0].clientX); }
+    function touchMove(e){ if(!isDragging) return; e.preventDefault(); onMove(e.touches[0].clientX); }
+    function touchEnd(){ onUp(); }
+
+    slides.addEventListener('mousedown', pointerDown, {passive:true});
+    slides.addEventListener('touchstart', touchStart, {passive:true});
+    slides.addEventListener('touchmove',  touchMove,  {passive:false});
+    slides.addEventListener('touchend',   touchEnd,   {passive:true});
+    slides.addEventListener('mouseleave', ()=>{ if(isDragging) onUp(); }, {passive:true});
+    slides.addEventListener('click', (e)=>{ if(blockedClick){ e.preventDefault(); e.stopPropagation(); } blockedClick=false; }, true);
+
+    // ===== 設定面板 =====
+    const panel = document.getElementById('panel');
+    const btnGear = document.getElementById('btn-gear');
+    const btnClose = document.getElementById('close');
+    const btnReset = document.getElementById('reset');
+
+    const $dur   = document.getElementById('dur');
+    const $idle  = document.getElementById('idle');
+    const $px    = document.getElementById('px');
+    const $ratio = document.getElementById('ratio');
+    const $en    = document.getElementById('enableDrag');
+    const $loop  = document.getElementById('enableLoop');
+    const $fade  = document.getElementById('edgeFade');
+    const $thumbTop = document.getElementById('thumbTop');
+
+    function syncFields(){
+      $dur.value   = Math.round(DUR/1000);
+      $idle.value  = Math.round(IDLE_AFTER/1000);
+      $px.value    = THRESHOLD_PX;
+      $ratio.value = Math.round(THRESHOLD_RATIO*100);
+      $en.checked  = !!ENABLE_DRAG;
+      $loop.checked= !!ENABLE_LOOP;
+      $fade.checked= !!EDGE_FADE;
+      $thumbTop.checked = !!THUMBS_TOP;
+    }
+    function persist(){ store.save({DUR,IDLE_AFTER,THRESHOLD_PX,THRESHOLD_RATIO,ENABLE_DRAG,ENABLE_LOOP,EDGE_FADE,THUMBS_TOP}); }
+    function openPanel(){ panel.classList.add('open'); syncFields(); }
+    function closePanel(){ panel.classList.remove('open'); }
+
+    btnGear.onclick = openPanel;
+    btnClose.onclick = closePanel;
+    btnReset.onclick = ()=>{
+      ({DUR,IDLE_AFTER,THRESHOLD_PX,THRESHOLD_RATIO,ENABLE_DRAG,ENABLE_LOOP,EDGE_FADE,THUMBS_TOP} = {...defaults});
+      persist(); syncFields(); applyThumbsTop(); restart();
+    };
+
+    $dur.oninput   = ()=>{ const v=Math.max(2,Math.min(60,+$dur.value|0)); DUR=v*1000; persist(); restart(); };
+    $idle.oninput  = ()=>{ const v=Math.max(3,Math.min(120,+$idle.value|0)); IDLE_AFTER=v*1000; persist(); };
+    $px.oninput    = ()=>{ THRESHOLD_PX=Math.max(0,Math.min(400,+$px.value|0)); persist(); };
+    $ratio.oninput = ()=>{ THRESHOLD_RATIO=Math.max(0,Math.min(0.5,+$ratio.value/100)); persist(); };
+    $en.onchange   = ()=>{ ENABLE_DRAG=!!$en.checked; persist(); };
+    $loop.onchange = ()=>{ ENABLE_LOOP=!!$loop.checked; persist(); };
+    $fade.onchange = ()=>{ EDGE_FADE=!!$fade.checked; persist(); };
+    $thumbTop.onchange = ()=>{ THUMBS_TOP=!!$thumbTop.checked; persist(); applyThumbsTop(); };
+
+    function applyThumbsTop(){
+      if(THUMBS_TOP){ thumbsWrap.classList.add('fixed'); carousel.classList.add('thumbs-top'); }
+      else{ thumbsWrap.classList.remove('fixed'); carousel.classList.remove('thumbs-top'); }
+    }
+
+    // 啟動
     play();
   </script>
 </body>
